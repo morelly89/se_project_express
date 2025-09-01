@@ -10,53 +10,23 @@ const createItem = (req, res) => {
   if (!imageUrl || !weather || !name) {
     return res.status(400).send(invalidDataPassed);
   }
-  console.log("req.body", req.body);
 
-  ClothingItem.create({ imageUrl, weather, name })
+  return ClothingItem.create({ imageUrl, weather, name })
     .then((item) => {
       if (!item) {
         return res.status(400).send(invalidDataPassed);
       }
-      console.log(item);
-      console.log(req.user._id);
-      res.send({ data: item });
+      return res.send({ data: item });
     })
-    .catch((err) => {
-      console.log("err", err);
-      res.status(400).send(defaultError);
-    });
+    .catch(() => res.status(400).send(defaultError));
 };
 
-// const getItem = (req, res) => {
-//   const { itemId } = req.params;
-//   if (!itemId) {
-//     return res.status(400).send(invalidDataPassed);
-//   }
-//   ClothingItem.findById(itemId)
-
-//     .then((item) => {
-//       if (!item) {
-//         return res.status(404).send(userOrItemNotFoundError);
-//       }
-//       return res.status(200).send(item);
-//     })
-
-//     .catch((err) => {
-//       console.log("err", err);
-//       res.status(400).send(defaultError);
-//     });
-// };
-
-const getItem = (req, res) => {
+const getItem = (req, res) =>
   ClothingItem.find({})
-    .then((items) => {
-      return res.status(200).send(items);
-    })
-    .catch((err) => {
-      console.error("Error retrieving items:", err);
+    .then((items) => res.status(200).send(items))
+    .catch(() => {
       res.status(500).send(defaultError);
     });
-};
 
 const updateItem = (req, res) => {
   const { itemId } = req.params;
@@ -66,7 +36,11 @@ const updateItem = (req, res) => {
     return res.status(400).send(invalidDataPassed);
   }
 
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } }, { new: true })
+  return ClothingItem.findByIdAndUpdate(
+    itemId,
+    { $set: { imageUrl } },
+    { new: true }
+  )
     .orFail()
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
@@ -80,9 +54,9 @@ const updateItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => {
+    .then(() => {
       res.status(200).send({});
     })
     .catch((err) => {

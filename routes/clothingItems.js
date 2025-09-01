@@ -5,6 +5,7 @@ const {
   updateItem,
   deleteItem,
 } = require("../controllers/clothingItems");
+
 router.post("/", createItem);
 router.get("/", getItem);
 router.put("/:itemId", updateItem);

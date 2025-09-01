@@ -9,30 +9,22 @@ const getUsers = (req, res) => {
   if (!req.params._id === null) {
     return res.status(400).send(invalidDataPassed);
   }
-  user
+  return user
     .find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).send(defaultError);
-    });
+    .then((data) => res.status(200).send(data))
+    .catch(() => res.status(500).send(defaultError));
 };
 
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
   if (!name || !avatar) {
-    console.log(name, avatar);
     return res.status(400).send(invalidDataPassed);
   }
-  console.log(req.body);
 
-  user
+  return user
     .create({ name, avatar })
-    .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).send(defaultError);
-    });
+    .then((data) => res.status(201).send(data))
+    .catch(() => res.status(500).send(defaultError));
 };
 
 const getUser = (req, res) => {
@@ -40,18 +32,15 @@ const getUser = (req, res) => {
   if (!userId) {
     return res.status(400).send(invalidDataPassed);
   }
-  console.log("_id", userId);
-  user
+  return user
     .findById(userId)
-    .then((user) => {
-      if (!user) {
+    .then((data) => {
+      if (!data) {
         return res.status(404).send(userOrItemNotFoundError);
       }
-      res.status(200).send(user);
+      return res.status(200).send(data);
     })
-    .catch((err) => {
-      return res.status(400).send(defaultError);
-    });
+    .catch(() => res.status(400).send(defaultError));
 };
 
 module.exports = { getUsers, createUser, getUser };
