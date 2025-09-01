@@ -1,4 +1,4 @@
-const user = require("../models/user");
+const User = require("../models/user");
 const {
   invalidDataPassed,
   userOrItemNotFoundError,
@@ -9,8 +9,7 @@ const getUsers = (req, res) => {
   if (!req.params._id === null) {
     return res.status(400).send(invalidDataPassed);
   }
-  return user
-    .find({})
+  return User.find({})
     .then((data) => res.status(200).send(data))
     .catch(() => res.status(500).send(defaultError));
 };
@@ -21,8 +20,7 @@ const createUser = (req, res) => {
     return res.status(400).send(invalidDataPassed);
   }
 
-  return user
-    .create({ name, avatar })
+  return User.create({ name, avatar })
     .then((data) => res.status(201).send(data))
     .catch(() => res.status(500).send(defaultError));
 };
@@ -32,8 +30,7 @@ const getUser = (req, res) => {
   if (!userId) {
     return res.status(400).send(invalidDataPassed);
   }
-  return user
-    .findById(userId)
+  return User.findById(userId)
     .then((data) => {
       if (!data) {
         return res.status(404).send(userOrItemNotFoundError);
