@@ -6,8 +6,4 @@ router.get("/", getUsers);
 router.post("/", createUser);
 router.get("/:userId", getUser);
 
-router.post("/", (req, res) => {
-  res.send("User created");
-});
-
 module.exports = router;
