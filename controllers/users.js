@@ -1,28 +1,17 @@
 const User = require("../models/user");
-const {
-  invalidDataPassed,
-  userOrItemNotFoundError,
-  defaultError,
-  DEFAULT,
-  NOT_FOUND,
-  BAD_REQUEST,
-} = require("../utils/errors");
+const { DEFAULT, NOT_FOUND, BAD_REQUEST } = require("../utils/errors");
 
-const getUsers = (req, res) => {
-  if (!req.params._id === null) {
-    return res.status(400).send(invalidDataPassed);
-  }
-  return User.find({})
+const getUsers = (req, res) =>
+  User.find({})
     .then((data) => res.status(200).send(data))
     .catch(() =>
       res.status(DEFAULT).send({ message: "Internal server error" })
     );
-};
 
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
   if (!name || !avatar) {
-    return res.status(400).send(invalidDataPassed);
+    return res.status(NOT_FOUND).send({ message: "Invalid data passed" });
   }
 
   return User.create({ name, avatar })
@@ -51,7 +40,7 @@ const getUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+        res.status(DEFAULT).send({ message: "Internal server error" });
       }
     });
 };
