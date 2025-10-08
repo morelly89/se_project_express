@@ -1,15 +1,7 @@
-const invalidDataPassed = {
-  message:
-    "invalid data passed to the methods for creating an item/user or updating an item, or invalid ID passed to the params.",
-};
+const BAD_REQUEST = 400;
 
-const userOrItemNotFoundError = {
-  message:
-    "there is no user or clothing item with the requested id, or the request was sent to a non-existent address",
-};
+const NOT_FOUND = 404;
 
-const defaultError = {
-  message: "default error. An error has occurred on the server.",
-};
+const DEFAULT = 500;
 
-module.exports = { invalidDataPassed, userOrItemNotFoundError, defaultError };
+module.exports = { BAD_REQUEST, NOT_FOUND, DEFAULT };

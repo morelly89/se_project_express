@@ -1,13 +1,9 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  invalidDataPassed,
-  userOrItemNotFoundError,
-  defaultError,
-} = require("../utils/errors");
+const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
 
 const likeItem = (req, res) => {
   if (!req.params.itemId) {
-    return res.status(400).send(invalidDataPassed);
+    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -19,21 +15,23 @@ const likeItem = (req, res) => {
   )
     .then((updatedItem) => {
       if (!updatedItem) {
-        return res.status(404).send(userOrItemNotFoundError);
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "User or item not found" });
       }
       return res.send(updatedItem);
     })
     .catch((err) => {
       if (err.name === "CastError" || err.name === "ValidationError") {
-        return res.status(400).send(invalidDataPassed);
+        return res.status(BAD_REQUEST).send({ message: "Invalid data Passed" });
       }
-      return res.status(500).send(defaultError);
+      return res.status(DEFAULT).send({ message: "internal server error" });
     });
 };
 
 const dislikeItem = (req, res) => {
   if (!req.params.itemId) {
-    return res.status(400).send(invalidDataPassed);
+    return res.status(BAD_REQUEST).send({ message: "invalid data passed" });
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -45,15 +43,17 @@ const dislikeItem = (req, res) => {
   )
     .then((updatedItem) => {
       if (!updatedItem) {
-        return res.status(404).send(userOrItemNotFoundError);
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "User or item not found" });
       }
       return res.send(updatedItem);
     })
     .catch((err) => {
       if (err.name === "CastError" || err.name === "ValidationError") {
-        return res.status(400).send(invalidDataPassed);
+        return res.status(BAD_REQUEST).send({ message: "invalid data passed" });
       }
-      return res.status(500).send(defaultError);
+      return res.status(DEFAULT).send({ message: "internal Server error" });
     });
 };
 
