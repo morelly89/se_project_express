@@ -11,7 +11,7 @@ const getUsers = (req, res) =>
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
   if (!name || !avatar) {
-    return res.status(NOT_FOUND).send({ message: "Invalid data passed" });
+    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
   }
 
   return User.create({ name, avatar })
@@ -40,8 +40,9 @@ const getUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(DEFAULT).send({ message: "Internal server error" });
+        return res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
       }
+      return res.status(DEFAULT).send({ message: "Internal server error" });
     });
 };
 
