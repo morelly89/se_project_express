@@ -1,10 +1,13 @@
 const router = require("express").Router();
 const userRouter = require("./users");
 const clothingItem = require("./clothingItems");
-const { likeItem, dislikeItem } = require("../controllers/likes");
+const auth = require("../middlewares/auth");
+const { createUser, login } = require("../controllers/users");
 
-router.put("/items/:itemId/likes", likeItem);
-router.delete("/items/:itemId/likes", dislikeItem);
-router.use("/users", userRouter);
-router.use("/items", clothingItem);
+router.use("/users", auth, userRouter);
+router.use("/items", auth, clothingItem);
+
+router.post("/signup", createUser);
+router.post("/signin", login);
+
 module.exports = router;

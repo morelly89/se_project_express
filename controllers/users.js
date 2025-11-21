@@ -1,35 +1,67 @@
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = require("../utils/config");
+const bcrypt = require("bcryptjs");
+
 const { DEFAULT, NOT_FOUND, BAD_REQUEST } = require("../utils/errors");
 
-const getUsers = (req, res) =>
-  User.find({})
-    .then((data) => res.status(200).send(data))
-    .catch(() =>
-      res.status(DEFAULT).send({ message: "Internal server error" })
-    );
-
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  if (!name || !avatar) {
+  const { name, avatar, email, password } = req.body;
+  if (!name || !avatar || !email || !password) {
     return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
   }
 
-  return User.create({ name, avatar })
-    .then((data) => res.status(201).send(data))
+  bcrypt
+    .hash(req.body.password, 10)
+
+    .then((hash) =>
+      User.create({
+        name,
+        avatar,
+        email,
+        password: hash,
+      })
+    )
+    .then((user) => {
+      const userObj = user.toObject();
+      delete userObj.password;
+      return res.status(201).send(userObj);
+    })
     .catch((err) => {
+      console.log(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+      }
+      if (err.code === 11000) {
+        return res.status(409).send({ message: "Email already in use" });
       }
       return res.status(DEFAULT).send({ message: "Internal server error" });
     });
 };
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  if (!userId) {
+const login = (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+  }
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
+const getCurrentUser = (req, res) => {
+  const { _id } = req.user;
+  if (!_id) {
     return res.status(BAD_REQUEST).send({ message: "invalid data passed" });
   }
-  return User.findById(userId)
+  return User.findById(_id)
     .then((data) => {
       if (!data) {
         return res
@@ -42,8 +74,27 @@ const getUser = (req, res) => {
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
       }
+
       return res.status(DEFAULT).send({ message: "Internal server error" });
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+const updateProfile = (req, res) => {
+  const { name, avatar } = req.body;
+  const { _id } = req.user;
+  if (!name || !avatar || !_id) {
+    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+  }
+  return User.findByIdAndUpdate(_id, { $set: { name, avatar } }, { new: true })
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+      }
+      return res.status(DEFAULT).send({ message: "Internal server error" });
+    });
+};
+
+module.exports = { createUser, login, getCurrentUser, updateProfile };
