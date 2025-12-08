@@ -1,8 +1,7 @@
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = require("../utils/config");
 const bcrypt = require("bcryptjs");
-
+const User = require("../models/user");
+const { JWT_SECRET } = require("../utils/config");
 const { DEFAULT, NOT_FOUND, BAD_REQUEST } = require("../utils/errors");
 
 const createUser = (req, res) => {
@@ -11,7 +10,7 @@ const createUser = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
   }
 
-  bcrypt
+  return bcrypt
     .hash(req.body.password, 10)
 
     .then((hash) =>
@@ -28,7 +27,6 @@ const createUser = (req, res) => {
       return res.status(201).send(userObj);
     })
     .catch((err) => {
-      console.log(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
       }

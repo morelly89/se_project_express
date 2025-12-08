@@ -1,6 +1,6 @@
+const { Types } = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
-const { Types } = require("mongoose");
 
 const createItem = (req, res) => {
   const { imageUrl, weather, name } = req.body;
@@ -39,20 +39,26 @@ async function deleteItem(req, res, next) {
       return res.status(BAD_REQUEST).send({ message: "Invalid item id" });
     }
 
-    const deleted = await ClothingItem.findOneAndDelete({
-      _id: itemId,
-      owner: userId,
-    });
+    const item = await ClothingItem.findById(itemId);
 
-    if (!deleted) {
+    if (!item) {
       return res.status(NOT_FOUND).send({ message: "Item not found" });
     }
 
-    return res.status(204).send("Deletion was successful");
+    if (item.owner.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .send({ message: "You are not allowed to delete this item" });
+    }
+
+    await item.deleteOne();
+
+    return res.status(200).send({ message: "Item was successfully deleted" });
   } catch (err) {
     if (err.name === "ValidationError") {
       return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
     }
+
     return next(err);
   }
 }
