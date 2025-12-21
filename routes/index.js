@@ -4,10 +4,10 @@ const clothingItem = require("./clothingItems");
 const auth = require("../middlewares/auth");
 const { createUser, login } = require("../controllers/users");
 
-router.use("/users", auth, userRouter);
-router.use("/items", auth, clothingItem);
+router.use("/items", clothingItem);
 
 router.post("/signup", createUser);
 router.post("/signin", login);
 
+router.use("/users", auth, userRouter);
 module.exports = router;

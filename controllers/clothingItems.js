@@ -1,6 +1,11 @@
 const { Types } = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
-const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { imageUrl, weather, name } = req.body;
@@ -47,7 +52,7 @@ async function deleteItem(req, res, next) {
 
     if (item.owner.toString() !== userId.toString()) {
       return res
-        .status(403)
+        .status(FORBIDDEN)
         .send({ message: "You are not allowed to delete this item" });
     }
 

@@ -2,7 +2,13 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
-const { DEFAULT, NOT_FOUND, BAD_REQUEST } = require("../utils/errors");
+const {
+  DEFAULT,
+  NOT_FOUND,
+  BAD_REQUEST,
+  CONFLICT,
+  UNAUTHORIZED,
+} = require("../utils/errors");
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -31,7 +37,7 @@ const createUser = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
       }
       if (err.code === 11000) {
-        return res.status(409).send({ message: "Email already in use" });
+        return res.status(CONFLICT).send({ message: "Email already in use" });
       }
       return res.status(DEFAULT).send({ message: "Internal server error" });
     });
@@ -50,7 +56,7 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message });
+      res.status(UNAUTHORIZED).send({ message: err.message });
     });
 };
 
@@ -83,13 +89,20 @@ const updateProfile = (req, res) => {
   if (!name || !avatar || !_id) {
     return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
   }
-  return User.findByIdAndUpdate(_id, { $set: { name, avatar } }, { new: true })
+  return User.findByIdAndUpdate(
+    _id,
+    { $set: { name, avatar } },
+    { new: true, runValidators: true }
+  )
     .then((user) => {
-      res.status(200).send(user);
+      if (!user) {
+        return res.status(NOT_FOUND).send({ message: "User not found" });
+      }
+      return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+        return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
       }
       return res.status(DEFAULT).send({ message: "Internal server error" });
     });
