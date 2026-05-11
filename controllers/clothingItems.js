@@ -1,38 +1,34 @@
 const { Types } = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  FORBIDDEN,
-} = require("../utils/errors");
-
-const createItem = (req, res) => {
+const BadRequestError = require("../errors/bad-request-error");
+const NotFoundError = require("../errors/not-found-error");
+const ForbiddenError = require("../errors/forbidden-error");
+const createItem = (req, res, next) => {
   const { imageUrl, weather, name } = req.body;
   if (!imageUrl || !weather || !name) {
-    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+    return next(new BadRequestError("Invalid data passed"));
   }
 
   return ClothingItem.create({ imageUrl, weather, name, owner: req.user._id })
     .then((item) => {
       if (!item) {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+        return next(new BadRequestError("Invalid data passed"));
       }
       return res.send({ data: item });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+        return next(new BadRequestError("Invalid data passed"));
       }
-      return res.status(DEFAULT).send({ message: "internal server error" });
+      return next(err);
     });
 };
 
-const getItems = (req, res) =>
+const getItems = (req, res, next) =>
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch(() => {
-      res.status(DEFAULT).send({ message: "internal server error" });
+    .catch((err) => {
+      return next(err);
     });
 
 async function deleteItem(req, res, next) {
@@ -41,29 +37,25 @@ async function deleteItem(req, res, next) {
     const { _id: userId } = req.user;
 
     if (!Types.ObjectId.isValid(itemId)) {
-      return res.status(BAD_REQUEST).send({ message: "Invalid item id" });
+      return next(new BadRequestError("Invalid data passed"));
     }
 
     const item = await ClothingItem.findById(itemId);
 
     if (!item) {
-      return res.status(NOT_FOUND).send({ message: "Item not found" });
+      return next(new NotFoundError("Item not found"));
     }
 
     if (item.owner.toString() !== userId.toString()) {
-      return res
-        .status(FORBIDDEN)
-        .send({ message: "You are not allowed to delete this item" });
+      return next(
+        new ForbiddenError("You are not allowed to delete this item")
+      );
     }
 
     await item.deleteOne();
 
     return res.status(200).send({ message: "Item was successfully deleted" });
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
-    }
-
     return next(err);
   }
 }

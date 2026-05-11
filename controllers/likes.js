@@ -1,9 +1,10 @@
 const ClothingItem = require("../models/clothingItem");
-const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
+const BadRequestError = require("../errors/bad-request-error");
+const NotFoundError = require("../errors/not-found-error");
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   if (!req.params.itemId) {
-    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+    return next(new BadRequestError("Invalid data passed"));
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -15,23 +16,21 @@ const likeItem = (req, res) => {
   )
     .then((updatedItem) => {
       if (!updatedItem) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "User or item not found" });
+        return next(new NotFoundError("User or item not found"));
       }
       return res.send(updatedItem);
     })
     .catch((err) => {
       if (err.name === "CastError" || err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data Passed" });
+        return next(new BadRequestError("User or item not found"));
       }
-      return res.status(DEFAULT).send({ message: "internal server error" });
+      return next(err);
     });
 };
 
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   if (!req.params.itemId) {
-    return res.status(BAD_REQUEST).send({ message: "invalid data passed" });
+    return next(new BadRequestError("User or item not found"));
   }
 
   return ClothingItem.findByIdAndUpdate(
@@ -43,17 +42,15 @@ const dislikeItem = (req, res) => {
   )
     .then((updatedItem) => {
       if (!updatedItem) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "User or item not found" });
+        return next(new NotFoundError("User or item not found"));
       }
       return res.send(updatedItem);
     })
     .catch((err) => {
       if (err.name === "CastError" || err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "invalid data passed" });
+        return next(new BadRequestError("User or item not found"));
       }
-      return res.status(DEFAULT).send({ message: "internal Server error" });
+      return next(err);
     });
 };
 

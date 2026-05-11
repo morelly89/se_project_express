@@ -1,19 +1,16 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+const NotFoundError = require("../errors/not-found-error");
+const BadRequestError = require("../errors/bad-request-error");
+const ConflictError = require("../errors/conflict-error");
+const UnauthorizedError = require("../errors/unauthorized-error");
 const { JWT_SECRET } = require("../utils/config");
-const {
-  DEFAULT,
-  NOT_FOUND,
-  BAD_REQUEST,
-  CONFLICT,
-  UNAUTHORIZED,
-} = require("../utils/errors");
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   if (!name || !avatar || !email || !password) {
-    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+    return next(new BadRequestError("Invalid data passed"));
   }
 
   return bcrypt
@@ -34,19 +31,19 @@ const createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+        return next(new BadRequestError("Invalid data passed"));
       }
       if (err.code === 11000) {
-        return res.status(CONFLICT).send({ message: "Email already in use" });
+        return next(new ConflictError("Email already in use"));
       }
-      return res.status(DEFAULT).send({ message: "Internal server error" });
+      return next(err);
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+    return next(new BadRequestError("Invalid data passed"));
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -56,38 +53,36 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(UNAUTHORIZED).send({ message: err.message });
+      return next(new UnauthorizedError("Incorrect email or password"));
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
   if (!_id) {
-    return res.status(BAD_REQUEST).send({ message: "invalid data passed" });
+    return next(new BadRequestError("Invalid data passed"));
   }
   return User.findById(_id)
     .then((data) => {
       if (!data) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "User or item not found" });
+        return next(new NotFoundError("User or item not found"));
       }
       return res.status(200).send(data);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
+        return next(new BadRequestError("Invalid user id"));
       }
 
-      return res.status(DEFAULT).send({ message: "Internal server error" });
+      return next(err);
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
   const { _id } = req.user;
   if (!name || !avatar || !_id) {
-    return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+    return next(new BadRequestError("Invalid data passed"));
   }
   return User.findByIdAndUpdate(
     _id,
@@ -96,15 +91,15 @@ const updateProfile = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User ot item not found"));
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data passed" });
+        return next(new BadRequestError("Invalid data passed"));
       }
-      return res.status(DEFAULT).send({ message: "Internal server error" });
+      return next(err);
     });
 };
 
