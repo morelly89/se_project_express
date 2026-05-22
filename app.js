@@ -30,9 +30,9 @@ app.use(requestLogger);
 app.use("/", mainRouter);
 
 // 404 handler
-app.use((req, res, next) => {
-  next(new NotFoundError("Requested resource not found"));
-});
+app.use((req, res, next) =>
+  next(new NotFoundError("Requested resource not found"))
+);
 
 // error logger should go AFTER routes and 404, but BEFORE error handlers
 app.use(errorLogger);

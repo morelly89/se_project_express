@@ -3,6 +3,7 @@ const ClothingItem = require("../models/clothingItem");
 const BadRequestError = require("../errors/bad-request-error");
 const NotFoundError = require("../errors/not-found-error");
 const ForbiddenError = require("../errors/forbidden-error");
+
 const createItem = (req, res, next) => {
   const { imageUrl, weather, name } = req.body;
   if (!imageUrl || !weather || !name) {
@@ -30,9 +31,7 @@ const createItem = (req, res, next) => {
 const getItems = (req, res, next) =>
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch((err) => {
-      return next(err);
-    });
+    .catch((err) => next(err));
 
 async function deleteItem(req, res, next) {
   try {
