@@ -2,7 +2,7 @@
 
 This project is a **RESTful API** for managing clothing items.  
 Users can **like**, **dislike**, **view**, and **delete** items.  
-Each item contains an **image**, a **URL**, and a **text description**.  
+Each item contains a **name**, an **image URL**, and a **weather type**.  
 The project demonstrates **CRUD operations**, **authentication**, and **proper error handling**.
 
 ---
@@ -18,5 +18,9 @@ The project demonstrates **CRUD operations**, **authentication**, and **proper e
 
 ## 🎥 Pitch Videos
 
-Watch here: [Google Drive pitch video](https://drive.google.com/file/d/1OmRbMUz7-ju4p8aB9phO3j0km7YAokEm/view?usp=sharing)
-Watch here: [Google Drive pitch video](https://drive.google.com/file/d/1sF10bAYkPT3lV9LxdGVZSHZuSoLSrbK_/view?usp=drive_link)
+- [Backend Pitch Video](https://drive.google.com/file/d/1OmRbMUz7-ju4p8aB9phO3j0km7YAokEm/view?usp=sharing)
+- [Deployment Pitch Video](https://drive.google.com/file/d/1sF10bAYkPT3lV9LxdGVZSHZuSoLSrbK_/view?usp=drive_link)
+
+## 🌐 Domain
+
+- [WTWR Live Website](https://wtwr-abdullah.jumpingcrab.com/)
