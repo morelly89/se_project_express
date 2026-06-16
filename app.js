@@ -26,6 +26,12 @@ app.use(express.json());
 // request logger should go BEFORE routes
 app.use(requestLogger);
 
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 // main routes
 app.use("/", mainRouter);
 
