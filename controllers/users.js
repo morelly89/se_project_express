@@ -52,7 +52,12 @@ const login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch(() => next(new UnauthorizedError("Incorrect email or password")));
+    .catch((err) => {
+      if (err.message === "Invalid credentials") {
+        return next(new UnauthorizedError("Invalid email or password"));
+      }
+      return next(err);
+    });
 };
 
 const getCurrentUser = (req, res, next) => {

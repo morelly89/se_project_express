@@ -10,9 +10,6 @@ const createItem = (req, res, next) => {
     return next(new BadRequestError("Invalid data passed"));
   }
 
-  console.log("CREATE ITEM BODY:", req.body);
-  console.log("CREATE ITEM USER:", req.user);
-
   return ClothingItem.create({ imageUrl, weather, name, owner: req.user._id })
     .then((item) => {
       if (!item) {

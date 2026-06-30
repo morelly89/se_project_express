@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 const cors = require("cors");
 const express = require("express");
-require("dotenv").config();
+const helmet = require("helmet");
 const { errors } = require("celebrate");
-
+const limiter = require("./middlewares/rateLimiter");
+require("dotenv").config();
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
@@ -21,9 +22,11 @@ mongoose
   });
 
 app.use(cors());
+app.use(helmet());
+app.use(limiter);
 app.use(express.json());
 
-// request logger should go BEFORE routes
+// request logger
 app.use(requestLogger);
 
 app.get("/crash-test", () => {
@@ -40,7 +43,7 @@ app.use((req, res, next) =>
   next(new NotFoundError("Requested resource not found"))
 );
 
-// error logger should go AFTER routes and 404, but BEFORE error handlers
+// error logger
 app.use(errorLogger);
 
 // celebrate error handler

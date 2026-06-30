@@ -33,15 +33,16 @@ const validateLogin = celebrate({
   }),
 });
 
-const validateUserId = celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string().length(24).hex().required(),
-  }),
-});
-
 const validateItemId = celebrate({
   params: Joi.object().keys({
     itemId: Joi.string().length(24).hex().required(),
+  }),
+});
+
+const validateUserProfile = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required.min(2).max(30),
+    avatar: Joi.string().custom(validateURL),
   }),
 });
 
@@ -49,6 +50,6 @@ module.exports = {
   validateCardBody,
   validateUserBody,
   validateLogin,
-  validateUserId,
   validateItemId,
+  validateUserProfile,
 };
